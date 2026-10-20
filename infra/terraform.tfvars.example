@@ -1,0 +1,16 @@
+# Copie para terraform.tfvars (gitignored) e preencha com valores reais.
+# NUNCA comite o terraform.tfvars.
+#
+# Alternativa sem arquivo: exporte como variavel de ambiente antes do apply
+#   export TF_VAR_jwt_secret=...
+
+# Precisa ser EXATAMENTE o mesmo valor configurado em JWT_SECRET no
+# Secret do Kubernetes do tech-challenge-app (app.jwt.secret). Minimo 32
+# bytes (256 bits):
+#   python -c "import secrets; print(secrets.token_urlsafe(32))"
+jwt_secret = "troque-por-uma-chave-com-pelo-menos-32-bytes"
+
+# Preencha na Fase 4, depois que o tech-challenge-app expuser a API via
+# Service LoadBalancer (ex.: "http://a1b2c3d4e5.us-east-1.elb.amazonaws.com").
+# Enquanto vazia, o Gateway so expoe /auth/cpf.
+app_backend_url = ""

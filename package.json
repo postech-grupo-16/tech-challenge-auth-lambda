@@ -1,0 +1,17 @@
+{
+  "name": "tech-challenge-auth-lambda",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Function Serverless de autenticacao via CPF para o Tech Challenge (16SOAT)",
+  "main": "src/authCpf.js",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
