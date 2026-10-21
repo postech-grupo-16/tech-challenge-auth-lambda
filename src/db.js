@@ -15,6 +15,12 @@ async function buscarClientePorCpf(cpfCnpj) {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     connectionTimeoutMillis: 5000,
+    // RDS exige conexao criptografada por padrao (rds.force_ssl=1); sem
+    // isso o Postgres rejeita com "no pg_hba.conf entry ... no encryption".
+    // rejectUnauthorized:false pula a verificacao da CA (simplificacao
+    // aceitavel aqui - a conexao continua criptografada, so nao valida a
+    // cadeia de certificado da RDS).
+    ssl: { rejectUnauthorized: false },
   });
 
   await client.connect();
