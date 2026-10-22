@@ -5,7 +5,7 @@
   "description": "Function Serverless de autenticacao via CPF para o Tech Challenge (16SOAT)",
   "main": "src/authCpf.js",
   "scripts": {
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test test/cpf.test.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
