@@ -11,7 +11,7 @@ locals {
 
 # Emite o token: POST /auth/cpf (rota publica no API Gateway).
 resource "aws_lambda_function" "auth_cpf" {
-  function_name = "${var.project_name}-auth-cpf"
+  function_name = "${local.name_prefix}-auth-cpf"
   role          = local.lab_role_arn
   handler       = "src/authCpf.handler"
   runtime       = "nodejs20.x"
@@ -36,7 +36,7 @@ resource "aws_lambda_function" "auth_cpf" {
 # Valida o token nas rotas protegidas (Lambda authorizer do API Gateway).
 # So precisa do JWT_SECRET - nao consulta o banco.
 resource "aws_lambda_function" "authorizer" {
-  function_name = "${var.project_name}-auth-authorizer"
+  function_name = "${local.name_prefix}-auth-authorizer"
   role          = local.lab_role_arn
   handler       = "src/authorizer.handler"
   runtime       = "nodejs20.x"

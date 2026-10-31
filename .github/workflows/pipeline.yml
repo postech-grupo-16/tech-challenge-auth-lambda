@@ -1,14 +1,17 @@
 name: Lambda CI/CD Pipeline
 
+# Dois ambientes, escolhidos pela branch:
+#   main    -> production (infra/environments/production.*, secret TF_VAR_JWT_SECRET, variavel APP_BACKEND_URL)
+#   homolog -> homolog    (infra/environments/homolog.*, secret TF_VAR_JWT_SECRET_HOMOLOG, variavel APP_BACKEND_URL_HOMOLOG)
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "homolog" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "homolog" ]
   workflow_dispatch:
     inputs:
       action:
-        description: "Ação do Terraform (apenas para push/dispatch na main)"
+        description: "Ação do Terraform (apenas para push/dispatch na main ou homolog)"
         required: true
         type: choice
         default: "apply"
@@ -19,6 +22,10 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  # base_ref = branch de destino do PR; ref_name = branch do push/dispatch.
+  DEPLOY_ENV: ${{ (github.base_ref || github.ref_name) == 'homolog' && 'homolog' || 'production' }}
+  TF_VAR_jwt_secret: ${{ secrets[(github.base_ref || github.ref_name) == 'homolog' && 'TF_VAR_JWT_SECRET_HOMOLOG' || 'TF_VAR_JWT_SECRET'] }}
+  TF_VAR_app_backend_url: ${{ vars[(github.base_ref || github.ref_name) == 'homolog' && 'APP_BACKEND_URL_HOMOLOG' || 'APP_BACKEND_URL'] }}
 
 jobs:
   # JOB 1: TESTES
@@ -49,10 +56,6 @@ jobs:
     needs: test
     if: github.event_name != 'workflow_dispatch' || inputs.action == 'plan'
 
-    env:
-      TF_VAR_jwt_secret: ${{ secrets.TF_VAR_JWT_SECRET }}
-      TF_VAR_app_backend_url: ${{ vars.APP_BACKEND_URL }}
-
     steps:
       - name: Checkout do Código
         uses: actions/checkout@v4
@@ -71,6 +74,13 @@ jobs:
           mkdir -p build
           zip -r build/lambda.zip src node_modules package.json -x '*.test.js'
 
+      - name: Verificar secret do ambiente
+        run: |
+          if [ -z "$TF_VAR_jwt_secret" ]; then
+            echo "::error::Secret JWT nao configurado para '$DEPLOY_ENV' (em homolog: TF_VAR_JWT_SECRET_HOMOLOG)"
+            exit 1
+          fi
+
       - name: Configurar Credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -86,7 +96,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra
-        run: terraform init -input=false
+        run: terraform init -input=false -backend-config="environments/$DEPLOY_ENV.s3.tfbackend"
 
       - name: Terraform Validate
         working-directory: infra
@@ -94,19 +104,15 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra
-        run: terraform plan -input=false -no-color
+        run: terraform plan -input=false -no-color -var-file="environments/$DEPLOY_ENV.tfvars"
 
-  # JOB 3: DEPLOY (apply automático em push na main, ou dispatch manual)
+  # JOB 3: DEPLOY (apply automático em push na main/homolog, ou dispatch manual)
   deploy:
     name: Terraform Apply
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || inputs.action != 'plan')
-    environment: production
-
-    env:
-      TF_VAR_jwt_secret: ${{ secrets.TF_VAR_JWT_SECRET }}
-      TF_VAR_app_backend_url: ${{ vars.APP_BACKEND_URL }}
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/homolog' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || inputs.action != 'plan')
+    environment: ${{ github.ref_name == 'homolog' && 'homolog' || 'production' }}
 
     steps:
       - name: Checkout do Código
@@ -126,6 +132,13 @@ jobs:
           mkdir -p build
           zip -r build/lambda.zip src node_modules package.json -x '*.test.js'
 
+      - name: Verificar secret do ambiente
+        run: |
+          if [ -z "$TF_VAR_jwt_secret" ]; then
+            echo "::error::Secret JWT nao configurado para '$DEPLOY_ENV' (em homolog: TF_VAR_JWT_SECRET_HOMOLOG)"
+            exit 1
+          fi
+
       - name: Configurar Credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -141,14 +154,14 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra
-        run: terraform init -input=false
+        run: terraform init -input=false -backend-config="environments/$DEPLOY_ENV.s3.tfbackend"
 
       - name: Terraform Apply ou Destroy
         working-directory: infra
         run: |
           if [ "${{ github.event_name == 'workflow_dispatch' && inputs.action || 'apply' }}" = "destroy" ]; then
-            terraform destroy -input=false -auto-approve
+            terraform destroy -input=false -auto-approve -var-file="environments/$DEPLOY_ENV.tfvars"
           else
-            terraform apply -input=false -auto-approve
+            terraform apply -input=false -auto-approve -var-file="environments/$DEPLOY_ENV.tfvars"
             terraform output
           fi
