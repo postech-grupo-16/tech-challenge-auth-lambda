@@ -43,3 +43,9 @@ variable "tags" {
     "Name" = "tech-challenge"
   }
 }
+
+variable "environment" {
+  description = "Ambiente (production ou homolog) - define o sufixo dos nomes e o prefixo SSM"
+  type        = string
+  default     = "production"
+}
