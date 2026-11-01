@@ -1,5 +1,5 @@
 resource "aws_apigatewayv2_api" "main" {
-  name          = "${var.project_name}-api"
+  name          = "${local.name_prefix}-api"
   protocol_type = "HTTP"
   description   = "Entrada publica do Tech Challenge: auth via CPF + proxy para a aplicacao"
 
@@ -13,7 +13,7 @@ resource "aws_apigatewayv2_api" "main" {
 }
 
 resource "aws_cloudwatch_log_group" "api_gw" {
-  name              = "/aws/apigateway/${var.project_name}-api"
+  name              = "/aws/apigateway/${local.name_prefix}-api"
   retention_in_days = 14
   tags              = var.tags
 }
@@ -64,7 +64,7 @@ resource "aws_apigatewayv2_route" "auth_cpf" {
 
 resource "aws_apigatewayv2_authorizer" "jwt_cpf" {
   api_id                            = aws_apigatewayv2_api.main.id
-  name                              = "${var.project_name}-cpf-authorizer"
+  name                              = "${local.name_prefix}-cpf-authorizer"
   authorizer_type                   = "REQUEST"
   authorizer_uri                    = aws_lambda_function.authorizer.invoke_arn
   authorizer_payload_format_version = "2.0"

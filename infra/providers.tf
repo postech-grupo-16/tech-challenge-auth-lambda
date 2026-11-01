@@ -11,8 +11,9 @@ terraform {
   backend "s3" {
     # Reaproveita o bucket de state criado por tech-challenge-infra-k8s
     # (precisa ser aplicado primeiro). Troque se usar outro bucket.
-    bucket = "tech-challenge-infra-k8s-gabrielfsg"
-    key    = "auth-lambda/terraform.tfstate"
+    # A key depende do ambiente: terraform init
+    # -backend-config=environments/<production|homolog>.s3.tfbackend
+    bucket = "tech-challenge-gp15"
     region = "us-east-1"
   }
 }

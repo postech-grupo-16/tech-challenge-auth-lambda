@@ -67,9 +67,11 @@ npm ci --omit=dev
 mkdir -p build && zip -r build/lambda.zip src node_modules package.json -x '*.test.js'
 
 cd infra
-terraform init
-terraform apply
+terraform init -backend-config=environments/production.s3.tfbackend
+terraform apply -var-file=environments/production.tfvars
 ```
+
+> **Ambientes:** troque `production` por `homolog` para operar a stack de homologação (nomes com sufixo `-homolog`, parâmetros SSM em `/tech-challenge-homolog/*`, state em outra key do mesmo bucket). Ao alternar entre ambientes na mesma pasta, rode `terraform init -reconfigure -backend-config=...`.
 
 ```bash
 terraform output auth_cpf_endpoint
@@ -89,7 +91,7 @@ Depois que o [tech-challenge-app](https://github.com/Gabrielfsg/tech-challenge-a
 
 ## CI/CD
 
-[`.github/workflows/pipeline.yml`](.github/workflows/pipeline.yml): roda os testes do Node em todo push/PR; em PR, faz só `terraform plan`; em push na `main` (ou `workflow_dispatch`), empacota a Lambda e roda `terraform apply`. Requer os secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` (credenciais do AWS Academy Learner Lab) e `TF_VAR_JWT_SECRET`, mais a variável de repositório `APP_BACKEND_URL` (opcional, Fase 4).
+[`.github/workflows/pipeline.yml`](.github/workflows/pipeline.yml): roda os testes do Node em todo push/PR; em PR, faz só `terraform plan`; em push na `main` (produção) ou na `homolog` (homologação), ou via `workflow_dispatch`, empacota a Lambda e roda `terraform apply`. Requer os secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` (credenciais do AWS Academy Learner Lab) e `TF_VAR_JWT_SECRET`, mais a variável de repositório `APP_BACKEND_URL` (opcional, Fase 4). Para homologação: secret `TF_VAR_JWT_SECRET_HOMOLOG` e variável `APP_BACKEND_URL_HOMOLOG`.
 
 A branch `main` é protegida — merges só via Pull Request.
 

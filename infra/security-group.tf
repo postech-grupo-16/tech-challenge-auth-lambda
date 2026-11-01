@@ -4,7 +4,7 @@
 # CloudWatch pelo control-plane do proprio Lambda, nao pela rede da VPC),
 # entao nao ha NAT Gateway nem VPC Endpoints aqui.
 resource "aws_security_group" "lambda" {
-  name        = "${var.project_name}-auth-lambda"
+  name        = "${local.name_prefix}-auth-lambda"
   description = "Egress da Lambda de autenticacao, restrito ao Postgres da VPC"
   vpc_id      = local.vpc_id
 
