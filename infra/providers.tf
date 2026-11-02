@@ -13,7 +13,7 @@ terraform {
     # (precisa ser aplicado primeiro). Troque se usar outro bucket.
     # A key depende do ambiente: terraform init
     # -backend-config=environments/<production|homolog>.s3.tfbackend
-    bucket = "tech-challenge-gp15"
+    bucket = "tech-challenge-gp15-00"
     region = "us-east-1"
   }
 }
