@@ -157,8 +157,8 @@ Deploy para produção: job Terraform Apply associado ao environment `production
 ## Links
 
 - Swagger local: <http://localhost:8080/swagger-ui.html>
-- Coleções [Postman](postman/): [acompanhamento](postman/acompanhamento.collection.json), [atendimento](postman/atendimento.collection.json), [estoque](postman/estoque.collection.json) e [coleção completa](postman/Tech-Challenge-Completa-Production.collection.json).
-- [Documentação arquitetural](docs/README.md): [diagrama de componentes](docs/component-diagram.md), [sequência de autenticação e OS](docs/sequence-auth-os.md), [diagrama ER](docs/er-diagram.md), [ADRs](docs/adrs/) e [RFCs](docs/rfcs/).
+- Coleções [Postman]([postman](https://github.com/postech-grupo-16/tech-challenge-app/tree/main/postman) [acompanhamento](https://github.com/postech-grupo-16/tech-challenge-app/blob/main/postman/acompanhamento.collection.json), [atendimento](https://github.com/postech-grupo-16/tech-challenge-app/blob/main/postman/atendimento.collection.json), [estoque](https://github.com/postech-grupo-16/tech-challenge-app/blob/main/postman/estoque.collection.json) e [coleção completa](https://github.com/postech-grupo-16/tech-challenge-app/blob/main/postman/Tech-Challenge-Completa-Production.collection.json).
+- [Documentação arquitetural](https://github.com/postech-grupo-16/tech-challenge-app/tree/main/docs#readme)
 - [tech-challenge-infra-k8s](https://github.com/postech-grupo-16/tech-challenge-infra-k8s)
 - [tech-challenge-infra-db](https://github.com/postech-grupo-16/tech-challenge-infra-db)
 - [tech-challenge-app](https://github.com/postech-grupo-16/tech-challenge-app)
